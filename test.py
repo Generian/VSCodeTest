@@ -5,8 +5,6 @@ import pygame
 
 pygame.init()
 
-print "test"
-
 FPS = 120
 
 WIDTH = 800
@@ -30,15 +28,27 @@ MARGIN = 3
 
 def add_block(gameover, block_list, block_number, width, speed, pos_x):
     """Adds a block to the list"""
+    if len(block_list) > 1:
+        pos_y = block_list[len(block_list)-1].pos_y - BLOCK_HEIGHT
+    else:
+        pos_y = HEIGHT - (block_number * BLOCK_HEIGHT)
     if not gameover:
         block_list.append(Rectangle(pos_x,
-                                    HEIGHT - (block_number * BLOCK_HEIGHT),
+                                    pos_y,
                                     width, BLOCK_HEIGHT, speed))
 
 
 def add_falling_block(list_parts, pos_x, pos_y, width, speed):
     """Adds a block to the list"""
     list_parts.append(Rectangle(pos_x, pos_y, width, BLOCK_HEIGHT, speed))
+
+def move_down(block_list):
+    """Moves everything down"""
+    blocknumber_medium = 0.5 * HEIGHT/BLOCK_HEIGHT
+    if len(block_list) > blocknumber_medium:
+        print "Move down"
+        for block in block_list:
+            block.pos_y += BLOCK_HEIGHT
 
 
 class Rectangle(object):
@@ -76,7 +86,6 @@ class Rectangle(object):
 
     def check_pos(self, block_list):
         """Checks if the block was stopped within a limit margin"""
-        print abs(self.pos_x - block_list[len(block_list)-2].pos_x)
         if abs(self.pos_x - block_list[len(block_list)-2].pos_x) <= MARGIN:
             self.pos_x = block_list[len(block_list)-2].pos_x
 
@@ -135,6 +144,7 @@ def main():
                     sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    move_down(block_list)
                     current_block = block_list[len(block_list)-1]
                     last_block = block_list[len(block_list)-2]
                     if current_block.speed_x < 0:
@@ -147,7 +157,9 @@ def main():
                     current_block.check_pos(block_list)
                     gameover = current_block.check_gameover(block_list)
                     current_block.break_up(block_list, list_parts, gameover)
-                    add_block(gameover, block_list, len(block_list) + 1, current_block.width, speed_new_block, pos_new_block)
+                    add_block(gameover, block_list, len(block_list) + 1, 
+                              current_block.width, speed_new_block, pos_new_block)
+
 
         display.fill(WHITE)
 
